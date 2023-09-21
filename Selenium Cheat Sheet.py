@@ -112,6 +112,7 @@ with pytest.raises(NotImplementedError):
 # This is my workaround for checking enabled/disabled status of a dropdown.
 dropdown = wait.until_not(ec.text_to_be_present_in_element_attribute((By.XPATH, 'Put locator value here'),
                                                                              'value', 'disabled'))
+# Select a single dropdown option:
 select = Select(dropdown)
 # Dropdown menu's visible options.
 select.select_by_visible_text('Four')
@@ -121,3 +122,21 @@ select.select_by_value('two')
 select.select_by_index(3)
 # apply the selected option in selenium:
 assert dropdown.is_selected()
+
+# Select multiple dropdown options simultaneously. Copied from Selenium GitHub
+select = Select(dropdown)
+# Select all options by first finding all of the available options
+option_elements = wait.until(ec.presence_of_all_elements_located((By.TAG_NAME, 'option')))
+# select.options returns a list of all options belonging to the dropdown.
+option_list = select.options
+# Apply all options in selenium
+assert option_elements == option_list
+
+# .all_selected_options() returns a list of options that have been preselected by the page or by you.
+selected_option_list = select.all_selected_options
+expected_selection = ['egg_element', 'sausage_element']
+if all(expected_selection) in selected_option_list:
+    assert selected_option_list == expected_selection
+else:
+    select.deselect_by_value('some text')
+    assert not dropdown.is_selected()
