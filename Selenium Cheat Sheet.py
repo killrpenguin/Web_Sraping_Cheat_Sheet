@@ -5,7 +5,9 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.select import Select
 import selenium
+import pytest
 
 # Common Selenium driver options: https://selenium-python.readthedocs.io/api.html
 link = "Webpage link string you want to scrape."
@@ -95,5 +97,27 @@ locate_text_box_without_wait = driver.find_element(By.XPATH, "Xpath of text box"
 locate_text_box.send_keys("Text you would input goes here.")
 send_keys_text_input = "It can be anything you would type or a predefined string"
 locate_text_box_without_wait.send_keys(send_keys_text_input)
+
 # Use Keys, imported on line 7, and its predefined methods to input special keyboard actions like arrow keys, enter or shift.
 locate_text_box.send_keys(Keys.ARROW_DOWN)
+locate_text_box.send_keys(Keys.ENTER)
+
+# Dropdown menu interaction:
+# Selenium documentation suggests using pytest instead of my example. This example is copied right from their GitHub.
+select_element = driver.find_element(By.NAME, 'single_disabled')
+select = Select(select_element)
+with pytest.raises(NotImplementedError):
+    select.select_by_value('disabled')
+# Select the dropdown if it isn't disabled. wait.until_not() returns false when the elements value!= disabled
+# This is my workaround for checking enabled/disabled status of a dropdown.
+dropdown = wait.until_not(ec.text_to_be_present_in_element_attribute((By.XPATH, 'Put locator value here'),
+                                                                             'value', 'disabled'))
+select = Select(dropdown)
+# Dropdown menu's visible options.
+select.select_by_visible_text('Four')
+# Text in the select elements value attribute.
+select.select_by_value('two')
+# Int in the select elements index attribute.
+select.select_by_index(3)
+# apply the selected option in selenium:
+assert dropdown.is_selected()
