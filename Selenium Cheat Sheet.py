@@ -1,20 +1,22 @@
-# Selenium:
 # Selenium imports:
 from selenium.webdriver import EdgeOptions, FirefoxOptions, SafariOptions, ChromeOptions
 from selenium.common import NoSuchElementException, ElementNotInteractableException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 import selenium
 
-# Selenium driver options: https://selenium-python.readthedocs.io/api.html
-link = "Webpage link here."
-proxy = "Proxy address here."
-user_agent = "User agent string here."
-# Exceptions imported on line 5 to be used in WebDriverWait
+# Common Selenium driver options: https://selenium-python.readthedocs.io/api.html
+link = "Webpage link string you want to scrape."
+proxy = "Proxy address string you pass to selenium in add_arguments."
+user_agent = "User agent you supply to selenium in add_arguments."
+
+# Exceptions imported on line 3 to be used in WebDriverWait
 exceptions_list = [NoSuchElementException, ElementNotInteractableException]
-# EdgeOptions() constructor and its import statement, line 4, change depending on which browser you are using.
-# EX: EdgeOptions(), SafariOptions(), FirefoxOptions()
+
+# EdgeOptions() constructor and its import statement, line 2, change depending on which browser you are using.
+# EX: EdgeOptions(), SafariOptions(), FirefoxOptions() Modify its behavior with the add_arguments method.
 edge_options = EdgeOptions()
 edge_options.use_chromium = True
 edge_options.add_argument('headless')
@@ -22,38 +24,76 @@ edge_options.add_argument('headless')
 edge_options.add_argument('disable-gpu')
 edge_options.add_argument("--proxy_server=%s" % proxy)
 edge_options.add_argument("--user_agent=%s" % user_agent)
-# Use with instead of explicitly closing driver with driver.close()
+
+# Use with instead of explicitly closing driver with driver.close() after scraping.
+with selenium.webdriver.Edge(options=edge_options) as driver:
+    # What to do with your new driver.
+    driver.get(link)
+    driver.get("www.webpagetoscrape.com")
+    driver.refresh()  # refresh the page
+    driver.back()  # browser backwards button
+    driver.forward()  # browser forward button
+    print(driver.page_source)  # print page source
+
+    # Cookies in the current session.
+    driver.add_cookie({name: cookie_value})
+    print(driver.get_cookie("cookie name"))
+    print(driver.get_cookies())
+    # Take screenshots.
+    driver.get_screenshot_as_png()
+    driver.save_screenshot('./image.png')
+    # Execute JS.
+    execute_js_on_selected_ele = driver.find_element(By.CSS_SElECTOR, 'h1')
+    driver.execute_script('some javascript here', execute_js_on_selected_ele)
 
 # Selenium common Wait Strategies: https://selenium-python.readthedocs.io/waits.html#implicit-waits:
-with selenium.webdriver.Edge(options=edge_options) as driver:
-    # Common get requests using selenium
-    driver.get(link)  # Get a webpage
-    cookie = driver.get_cookie("cookie name")  # Get a cookie from the current session.
-    cookie_dict = driver.get_cookies()  # Get all cookies visible in current session.
-    screenshot = driver.get_screenshot_as_png()  # Take a screenshot of the current session.
-    window_position_dict = driver.get_window_position()  # return a dictionary with the current session window position
-
-    # Implicitly wait is a general pause statement specific to the selenium webdriver.
-    driver.implicitly_wait(10)
-    # WebDriverWait constructor, imported on line 6, is used to more effectively wait for changes to DOM.
-    wait = WebDriverWait(driver=driver,  # driver defined in the with statement.
-                         timeout=30,  # adjust for longer wait times.
-                         poll_frequency=.20,  # Change frequency of change to selector.
-                         ignored_exceptions=exceptions_list
-                         # list of exceptions to ignore while waiting for timeout to expire
-                         )
+# Implicitly wait is a general pause statement specific to the selenium webdriver.
+driver.implicitly_wait(10)  # int in seconds to wait.
+# WebDriverWait constructor, imported on line 4, is used to more effectively wait for changes to DOM.
+wait = WebDriverWait(driver=driver,  # driver defined in the with statement.
+                     timeout=30,  # adjust for longer wait times.
+                     poll_frequency=.20,  # Change frequency of change to selector.
+                     ignored_exceptions=exceptions_list
+                     # list of exceptions to ignore while waiting for timeout to expire
+                     )
 
 # Selenium Common Locator Strategies:
-"""Available Locators: ID = "id", NAME = "name", XPATH = "xpath", LINK_TEXT = "link text", 
-PARTIAL_LINK_TEXT = "partial link text", TAG_NAME = "tag name", CLASS_NAME = "class name", 
+# XPATH and Class_Name are the two best options for selecting a specific element on a webpage.
+
+"""Available Locators: ID = "id", NAME = "name", XPATH = "xpath", LINK_TEXT = "link text",
+PARTIAL_LINK_TEXT = "partial link text", TAG_NAME = "tag name", CLASS_NAME = "class name",
 CSS_SELECTOR = "css selector" """
+
 returned_object = driver.find_element(By.XPATH, "Put locater value here")
 returned_list = driver.find_elements(By.CLASS_NAME, "Put locater value here")
+
 # Including a wait strategy in a selector statement:
 # Most expected_conditions take a tuple formated as (By.locator, "selector value")
-# ec is an alias for expected_conditions imported on line 7 and By is imported on line 8
+# ec is an alias for expected_conditions imported on line 5 and By is imported on line 6
+
 returned_object1 = wait.until(ec.presence_of_element_located((By.XPATH, "Put locater value here")))
 returned_list1 = wait.until(ec.presence_of_all_elements_located((By.CLASS_NAME, "Put locater value here")))
-# until not triggers if expected_condition returns false.
+
+# .until_not() triggers if expected_condition returns false.
 returned_object2 = wait.until_not(ec.text_to_be_present_in_element((By.LINK_TEXT, "Put locator value here"),
                                                                    text_="Some text in element"))
+
+# Interacting with elements like buttons, dropdowns, radials, text boxes, etc.
+
+# Button interaction. First locate the button and then use the .click() method to click it.
+click_button_without_waiting = driver.find_element(By.XPATH, "Submit button xpath")
+click_button_without_waiting.click()
+
+# Expected conditions has a method that specifically waits for the element to be clickable.
+click_button = wait.until(ec.element_to_be_clickable((By.CLASS_NAME, "button class name")))
+click_button_without_waiting.click()
+
+# Input text into form field or text box.
+# First locate the text box and then use .send_keys() method to interact with the element.
+locate_text_box = wait.until(ec.presence_of_element_located((By.XPATH, "Xpath of text box")))
+locate_text_box_without_wait = driver.find_element(By.XPATH, "Xpath of text box")
+locate_text_box.send_keys("Text you would input goes here.")
+send_keys_text_input = "It can be anything you would type or a predefined string"
+locate_text_box_without_wait.send_keys(send_keys_text_input)
+# Use Keys, imported on line 7, and its predefined methods to input special keyboard actions like arrow keys, enter or shift.
+locate_text_box.send_keys(Keys.ARROW_DOWN)
