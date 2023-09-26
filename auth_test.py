@@ -42,14 +42,14 @@ with seleniumwire.webdriver.Edge(options=edge_options, seleniumwire_options=sel_
         is_user_verified=True  # Set to true so user verification always succeeds.
     )
     driver.add_virtual_authenticator(options=virt_auth_options)
-    credential = Credential(
+"""    credential = Credential(
         credential_id="",
         is_resident_credential=True,
         rp_id="",
         user_handle="test123",
         private_key= ,
         sign_count=0
-    )
+    )"""
     driver.add_credential(credential=credential)
     driver.get(link)
     test_auth = wait.until(ec.presence_of_element_located((By.XPATH, authenticate_button)))
