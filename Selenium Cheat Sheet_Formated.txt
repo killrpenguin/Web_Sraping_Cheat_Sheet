@@ -28,26 +28,29 @@ import pytest
         edge_options.add_argument("--user_agent=%s" % user_agent)
 
 # Use with instead of explicitly closing driver with driver.close() after scraping.
-    with selenium.webdriver.Edge(options=edge_options) as driver:
+with selenium.webdriver.Edge(options=edge_options) as driver:
 
-        # What to do with your new driver.
-            driver.get(link)
-            driver.get("www.webpagetoscrape.com")
-            driver.refresh() # refresh the page
-            driver.back() # browser backwards button
-            driver.forward() # browser forward button
-            print(driver.page_source) # print page source
+    # Browser buttons and actions on pages.
+        driver.get(link)
+        driver.get("www.webpagetoscrape.com")
+        driver.refresh() # refresh the page
+        driver.back() # browser backwards button
+        driver.forward() # browser forward button
+        print(driver.page_source) # print page source
 
-            # Cookies in the current session.
-                driver.add_cookie({name: cookie_value})
-                print(driver.get_cookie("cookie name"))
-                print(driver.get_cookies())
-            # Take screenshots.
-                driver.get_screenshot_as_png()
-                driver.save_screenshot('./image.png')
-            # Execute JS.
-                execute_js_on_selected_ele = driver.find_element(By.CSS_SElECTOR, 'h1')
-                driver.execute_script('some javascript here', execute_js_on_selected_ele)
+    # Cookies, Screenshots and Execute JS.
+        driver.add_cookie({name: cookie_value})
+        print(driver.get_cookie("cookie name"))
+        print(driver.get_cookies())
+        # Get screenshot as bytes string. Use PIL to convert bytes string to image and save.
+            screenshot = driver.get_screenshot_as_png()
+        # Take screenshots.
+            driver.save_screenshot("File name here. MUST include .png extention")
+        # Execute JavaScript. This command will scroll to the bottom of the screen.
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        # Execute a Javascript "?.click()" on a JS path supplied by Chrome Elements page.
+        # JS Path supplied by Chrome: document.querySelector("#main > div:nth-child(3) > a.w3-right.w3-btn")
+            driver.execute_script('document.querySelector("#main > div:nth-child(3) > a.w3-right.w3-btn")?.click()')
 
 # Selenium common Wait Strategies: https://selenium-python.readthedocs.io/waits.html#implicit-waits:
     # Implicitly wait is a general pause statement specific to the selenium webdriver.
@@ -61,7 +64,7 @@ import pytest
                              )
 
 # Selenium Common Locator Strategies:
-# XPATH and Class_Name are the two best options for selecting a specific element on a webpage.
+# XPATH and Class_Name are the two most common options for selecting a specific element on a webpage.
 
 """Available Locators: ID = "id", NAME = "name", XPATH = "xpath", LINK_TEXT = "link text",
 PARTIAL_LINK_TEXT = "partial link text", TAG_NAME = "tag name", CLASS_NAME = "class name",
