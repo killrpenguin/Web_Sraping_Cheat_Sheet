@@ -26,6 +26,12 @@ import pytest
         edge_options.add_argument('disable-gpu')
         edge_options.add_argument("--proxy_server=%s" % proxy)
         edge_options.add_argument("--user_agent=%s" % user_agent)
+        # Prevent selenium detection
+        edge_options.add_argument("--disable-blink-features")
+        # Exclude the collection of enable-automation switches
+        edge_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        # Turn-off useAutomationExtension
+        edge_options.add_experimental_option('useAutomationExtension', False)
 
 # Use with instead of explicitly closing driver with driver.close() after scraping.
 with selenium.webdriver.Edge(options=edge_options) as driver:
